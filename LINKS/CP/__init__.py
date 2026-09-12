@@ -1,3 +1,8 @@
+import glob
+import json
+import os
+import time
+
 from ..Optimization import Tools
 from ..Visualization import ParetoVisualizer
 import numpy as np
@@ -104,6 +109,94 @@ class SubmissionTools(Tools):
         )
 
 
+def _mechanism_to_jsonable(mechanism: dict) -> dict:
+    """Convert one mechanism's arrays to plain nested lists for JSON serialization."""
+    out = {
+        'x0': np.asarray(mechanism['x0']).tolist(),
+        'edges': np.asarray(mechanism['edges']).tolist(),
+        'fixed_joints': np.asarray(mechanism['fixed_joints']).tolist(),
+    }
+    target_idx = mechanism.get('target_idx')
+    if target_idx is not None:
+        out['target_idx'] = int(target_idx)
+    return out
+
+
+def _mechanism_from_jsonable(mechanism: dict) -> dict:
+    """Inverse of _mechanism_to_jsonable: nested lists back to numpy arrays."""
+    out = {
+        'x0': np.array(mechanism['x0'], dtype=float),
+        'edges': np.array(mechanism['edges'], dtype=int),
+        'fixed_joints': np.array(mechanism['fixed_joints'], dtype=int),
+    }
+    target_idx = mechanism.get('target_idx')
+    if target_idx is not None:
+        out['target_idx'] = int(target_idx)
+    return out
+
+
+def submission_to_jsonable(submission: dict) -> dict:
+    """A full submission dict, with every mechanism's arrays converted to plain lists."""
+    return {problem: [_mechanism_to_jsonable(m) for m in population]
+            for problem, population in submission.items()}
+
+
+def submission_from_jsonable(data: dict) -> dict:
+    """Inverse of submission_to_jsonable."""
+    return {problem: [_mechanism_from_jsonable(m) for m in population]
+            for problem, population in data.items()}
+
+
+def save_submission(submission: dict, path: str) -> None:
+    """Save a submission dict as JSON (mechanism arrays become plain nested lists)."""
+    with open(path, 'w') as f:
+        json.dump(submission_to_jsonable(submission), f)
+
+
+def load_submission(path: str) -> dict:
+    """Load a submission previously saved with save_submission -- or, for backward
+    compatibility, an older submission saved with np.save (a .npy path)."""
+    if path.endswith('.npy'):
+        return np.load(path, allow_pickle=True).item()
+    with open(path) as f:
+        return submission_from_jsonable(json.load(f))
+
+
+def save_egg_result(problem_num: int, population: List[dict], solutions_dir: str = 'solutions') -> str:
+    """Save one egg's solved population to its own timestamped file in solutions_dir, in the
+    single-problem convention consolidate_solutions expects. Returns the path saved to."""
+    os.makedirs(solutions_dir, exist_ok=True)
+    egg_submission = make_empty_submission()
+    egg_submission[f'Problem {problem_num}'] = population
+
+    timestamp = time.strftime('%Y%m%d_%H%M%S')
+    save_path = os.path.join(solutions_dir, f'egg_{problem_num}_{timestamp}.json')
+    save_submission(egg_submission, save_path)
+    return save_path
+
+
+def consolidate_solutions(tools: 'SubmissionTools', target_curves: np.ndarray,
+                           solutions_dir: str = 'solutions') -> dict:
+    """Pool every file save_egg_result has saved (across every egg and every run/re-run) and
+    reduce each egg's pool down to the submission convention: one mechanism per size, keeping
+    whichever is best (lowest distance) at each size (via tools.best_of_each_size)."""
+    final_submission = make_empty_submission()
+
+    for problem_num in range(1, 7):
+        files = (glob.glob(os.path.join(solutions_dir, f'egg_{problem_num}_*.json')) +
+                 glob.glob(os.path.join(solutions_dir, f'egg_{problem_num}_*.npy')))  # .npy: older saves
+
+        pooled = []
+        for f in files:
+            saved = load_submission(f)
+            pooled.extend(saved[f'Problem {problem_num}'])
+
+        final_submission[f'Problem {problem_num}'] = tools.best_of_each_size(
+            pooled, target_curve=target_curves[problem_num - 1])
+
+    return final_submission
+
+
 def evaluate_submission(
     submission: Union[dict, str],
     target_curves: Union[np.ndarray, str] = 'target_curves.npy') -> float:
@@ -117,7 +210,7 @@ def evaluate_submission(
     optimization_tools.compile()
 
     if isinstance(submission, str):
-        submission = np.load(submission, allow_pickle=True).item()
+        submission = load_submission(submission)
     if isinstance(target_curves, str):
         target_curves = np.load(target_curves)
 
