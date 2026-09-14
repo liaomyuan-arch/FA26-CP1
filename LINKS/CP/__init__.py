@@ -15,6 +15,12 @@ from pymoo.indicators.hv import HV
 # plot_HV's strict "<" comparison entirely) if the reference point were 15.0 instead of 16.0.
 DEFAULT_REF = np.array([1.5, 16.0])
 
+# The smallest possible closed-loop, single-DOF planar linkage is a four-bar (the fixed crank
+# plus one more link back to a second ground pivot) -- nothing below 4 joints is a mechanism
+# in the sense this challenge is about. compute_F treats anything smaller as invalid, the same
+# way it already treats an over-complexity mechanism as invalid via the DEFAULT_REF check.
+MIN_COMPLEXITY = 4
+
 
 def make_empty_submission():
     return {
@@ -48,12 +54,35 @@ class SubmissionTools(Tools):
         fixed_joints = [np.array(p['fixed_joints']) for p in population]
         target_idx = [p.get('target_idx', None) for p in population]
 
-        distances = np.array(self(x0s=x0s, edges=edges, fixed_joints=fixed_joints,
-                                   target_curve=target_curve, target_idx=target_idx))
-
         # Complexity is simply the number of joints (nodes) in each mechanism.
         # x0 holds only the free joints (nodes 2+); add back the 2 fixed crank nodes.
         complexity = np.array([x0.shape[0] + 2 for x0 in x0s], dtype=float)
+
+        # Below MIN_COMPLEXITY there's no closed-loop mechanism to solve for (e.g. a bare
+        # motor with no free joints still "solves", tracing the crank tip's circle -- but
+        # that's not a linkage this challenge is scoring). Above self.max_size, the solver's
+        # preallocated arrays can't even hold the mechanism and raise. Skip solving either
+        # case and just score them as unconditionally invalid (infinite distance), the same
+        # treatment every other invalid mechanism already gets everywhere else in this class.
+        in_range = np.logical_and(complexity >= MIN_COMPLEXITY, complexity <= self.max_size)
+
+        if not np.all(in_range):
+            n_too_small = int(np.sum(complexity < MIN_COMPLEXITY))
+            n_too_large = int(np.sum(complexity > self.max_size))
+            print(f"Warning: {n_too_small + n_too_large} mechanism(s) in this population have "
+                  f"an out-of-range complexity ({n_too_small} below the {MIN_COMPLEXITY}-joint "
+                  f"minimum, {n_too_large} above the {self.max_size}-joint solver limit) and "
+                  f"will be scored as invalid (infinite distance).")
+
+        distances = np.full(len(population), np.inf)
+        if np.any(in_range):
+            idx = np.where(in_range)[0]
+            solved = np.array(self(x0s=[x0s[i] for i in idx],
+                                   edges=[edges[i] for i in idx],
+                                   fixed_joints=[fixed_joints[i] for i in idx],
+                                   target_curve=target_curve,
+                                   target_idx=[target_idx[i] for i in idx]))
+            distances[idx] = solved
 
         return np.stack([distances, complexity], axis=1)
 
@@ -202,6 +231,13 @@ def evaluate_submission(
     target_curves: Union[np.ndarray, str] = 'target_curves.npy') -> float:
 
     optimization_tools = SubmissionTools(
+        # timesteps=200 matches target_curves.npy's own resolution, and is a deliberate
+        # speed/accuracy tradeoff, not a bug: both distance and validity (does the mechanism
+        # lock at some crank angle?) are only ever checked at these 200 sampled angles. A
+        # mechanism can therefore score as valid here while actually locking, or scoring
+        # slightly differently, at a crank angle that falls between samples -- denser sampling
+        # only shrinks how often this happens, it doesn't eliminate it, so we don't chase it
+        # here. This is the same resolution students see in the starter notebook.
         timesteps=200,
         max_size=20,
         scaled=True, # scale-invariant distance: mechanism scale is standardized by the fixed crank, not by curve size

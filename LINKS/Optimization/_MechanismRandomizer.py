@@ -127,7 +127,7 @@ class MechanismRandomizer:
         remaining = batch_size - final_count
 
         if remaining > 0:
-            complement = self.batch_generate(remaining, n_tests, max_tries)
+            complement = self.batch_generate(remaining, n, n_tests, max_tries)
             mechanisms.extend(complement)
 
         return mechanisms

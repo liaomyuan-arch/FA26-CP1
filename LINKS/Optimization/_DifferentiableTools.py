@@ -72,7 +72,7 @@ class DifferentiableTools:
             fixed_nodes=fixed_joints
         )
 
-        return PreprocessedBatch(As_, node_types_, orders, mappings, is_single)
+        return PreprocessedBatch(As_, node_types_, orders, mappings, valid, is_single)
 
     @overload
     def __call__(self,
