@@ -1,0 +1,295 @@
+{
+  "all_valid": true,
+  "rows": [
+    {
+      "problem": 1,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.3171340823173523,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 1,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.11726845055818558,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 1,
+      "submission_index": 2,
+      "complexity": 7,
+      "distance": 0.04879109188914299,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 1,
+      "submission_index": 3,
+      "complexity": 10,
+      "distance": 0.03765587508678436,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 1.4096249341964722,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 1.1819735765457153,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 2,
+      "complexity": 6,
+      "distance": 1.1786727905273438,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 3,
+      "complexity": 7,
+      "distance": 0.896074116230011,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 4,
+      "complexity": 8,
+      "distance": 0.45175546407699585,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 2,
+      "submission_index": 5,
+      "complexity": 9,
+      "distance": 0.06287898123264313,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 3,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.45869898796081543,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 3,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.42748895287513733,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 3,
+      "submission_index": 2,
+      "complexity": 6,
+      "distance": 0.2559192478656769,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 3,
+      "submission_index": 3,
+      "complexity": 10,
+      "distance": 0.18232271075248718,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 3,
+      "submission_index": 4,
+      "complexity": 11,
+      "distance": 0.15211784839630127,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 4,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.19128850102424622,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 4,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.18362490832805634,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 4,
+      "submission_index": 2,
+      "complexity": 6,
+      "distance": 0.16775290668010712,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 4,
+      "submission_index": 3,
+      "complexity": 8,
+      "distance": 0.1314869374036789,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 4,
+      "submission_index": 4,
+      "complexity": 10,
+      "distance": 0.11752886325120926,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.37883833050727844,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.25608882308006287,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 2,
+      "complexity": 6,
+      "distance": 0.24335767328739166,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 3,
+      "complexity": 7,
+      "distance": 0.24148613214492798,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 4,
+      "complexity": 8,
+      "distance": 0.23341068625450134,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 5,
+      "submission_index": 5,
+      "complexity": 11,
+      "distance": 0.1858072280883789,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 6,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.7391031384468079,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 6,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.5569589734077454,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 6,
+      "submission_index": 2,
+      "complexity": 6,
+      "distance": 0.3333587944507599,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 6,
+      "submission_index": 3,
+      "complexity": 7,
+      "distance": 0.12110915780067444,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 6,
+      "submission_index": 4,
+      "complexity": 10,
+      "distance": 0.10794912278652191,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    }
+  ],
+  "official_score": {
+    "Overall Score": 15.26615836409231,
+    "Score Breakdown": {
+      "Problem 1": 17.07601882889867,
+      "Problem 2": 12.441754460334778,
+      "Problem 3": 15.147222340106964,
+      "Problem 4": 16.32143424451351,
+      "Problem 5": 15.250962764024734,
+      "Problem 6": 15.359557546675205
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "all_valid": true,
+  "rows": [
+    {
+      "problem": 1,
+      "submission_index": 0,
+      "complexity": 4,
+      "distance": 0.31933528184890747,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 1,
+      "submission_index": 1,
+      "complexity": 5,
+      "distance": 0.12712614238262177,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    },
+    {
+      "problem": 1,
+      "submission_index": 2,
+      "complexity": 8,
+      "distance": 0.050573382526636124,
+      "valid": true,
+      "simulation_valid": true,
+      "errors": []
+    }
+  ],
+  "official_score": {
+    "Overall Score": 2.815783013900121,
+    "Score Breakdown": {
+      "Problem 1": 16.894698083400726,
+      "Problem 2": 0.0,
+      "Problem 3": 0.0,
+      "Problem 4": 0.0,
+      "Problem 5": 0.0,
+      "Problem 6": 0.0
+    }
+  }
+}
