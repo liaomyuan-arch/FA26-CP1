@@ -50,7 +50,7 @@
       "problem": 2,
       "submission_index": 1,
       "complexity": 5,
-      "distance": 1.1819735765457153,
+      "distance": 0.05880793556571007,
       "valid": true,
       "simulation_valid": true,
       "errors": []
@@ -58,35 +58,8 @@
     {
       "problem": 2,
       "submission_index": 2,
-      "complexity": 6,
-      "distance": 1.1786727905273438,
-      "valid": true,
-      "simulation_valid": true,
-      "errors": []
-    },
-    {
-      "problem": 2,
-      "submission_index": 3,
       "complexity": 7,
-      "distance": 0.896074116230011,
-      "valid": true,
-      "simulation_valid": true,
-      "errors": []
-    },
-    {
-      "problem": 2,
-      "submission_index": 4,
-      "complexity": 8,
-      "distance": 0.45175546407699585,
-      "valid": true,
-      "simulation_valid": true,
-      "errors": []
-    },
-    {
-      "problem": 2,
-      "submission_index": 5,
-      "complexity": 9,
-      "distance": 0.06287898123264313,
+      "distance": 0.04799840226769447,
       "valid": true,
       "simulation_valid": true,
       "errors": []
@@ -282,10 +255,10 @@
     }
   ],
   "official_score": {
-    "Overall Score": 15.26615836409231,
+    "Overall Score": 15.865995217114687,
     "Score Breakdown": {
       "Problem 1": 17.07601882889867,
-      "Problem 2": 12.441754460334778,
+      "Problem 2": 16.040775578469038,
       "Problem 3": 15.147222340106964,
       "Problem 4": 16.32143424451351,
       "Problem 5": 15.250962764024734,

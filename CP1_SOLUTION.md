@@ -62,11 +62,14 @@ Use the assignment environment (the requirements specify JAX 0.5.3 and pymoo 0.6
 ```powershell
 python cp1_optimizer.py quick
 python cp1_optimizer.py full
+python cp1_optimizer.py problem2
 python cp1_optimizer.py validate
 python cp1_optimizer.py visualize
 ```
 
 `quick` runs a small end-to-end test on Problem 1 and writes
 `results/quick_submission.json`.  `full` searches all six problems and writes the final
-`my_submission.json`.  Both modes are deterministic for their recorded seeds and resume from
-the candidate archive.
+`my_submission.json`.  `problem2` performs the intensive, score-gated targeted search over
+Problem 2 complexities 5–8; it preserves every other problem and only replaces the submission
+when the independently reloaded official score increases.  All search modes are deterministic
+for their recorded seeds and resume from the candidate archive.

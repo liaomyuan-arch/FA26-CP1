@@ -101,6 +101,24 @@ FULL_CONFIG = SearchConfig(
 )
 
 
+@dataclass(frozen=True)
+class TargetedConfig:
+    problem_number: int = 2
+    sizes: tuple[int, ...] = (5, 6, 7, 8)
+    random_restarts_per_size: int = 32
+    max_topology_groups: int = 20
+    population_size: int = 48
+    generations: int = 50
+    gradient_finalists: int = 6
+    gradient_steps: int = 250
+    gradient_lr: float = 8e-3
+    base_seeds: tuple[int, ...] = (271021, 271057, 271091, 271129)
+    perturb_scale: float = 0.22
+
+
+PROBLEM2_TARGETED_CONFIG = TargetedConfig()
+
+
 def mechanism_to_jsonable(mechanism: dict[str, Any]) -> dict[str, Any]:
     out = {
         "x0": np.asarray(mechanism["x0"], dtype=float).tolist(),
@@ -335,6 +353,86 @@ def seeded_evolution(
     return clone_with_x(base, best_x), best_d
 
 
+def seeded_evolution_multi(
+    tools: SubmissionTools,
+    mechanisms: list[dict[str, Any]],
+    target_curve: np.ndarray,
+    rng: np.random.Generator,
+    population_size: int,
+    generations: int,
+    perturb_scale: float,
+) -> tuple[dict[str, Any], float]:
+    """Topology-preserving evolution from several valid position seeds.
+
+    All inputs must share edges, fixed joints, and target index.  Offspring use a
+    mixture of arithmetic crossover, differential mutation, coordinate crossover,
+    and Gaussian mutation; connectivity is never mutated, so structural validity is
+    preserved and only geometric locking needs to be rejected by the instructor tool.
+    """
+    if not mechanisms:
+        raise ValueError("At least one seed mechanism is required")
+    base = normalized_mechanism(mechanisms[0])
+    seed_positions = [np.asarray(mech["x0"], dtype=float).copy() for mech in mechanisms]
+    all_points = np.concatenate(seed_positions, axis=0)
+    span = max(float(np.ptp(all_points, axis=0).max()), 0.5)
+
+    positions = [position.copy() for position in seed_positions[:population_size]]
+    while len(positions) < population_size:
+        parent = seed_positions[int(rng.integers(0, len(seed_positions)))]
+        scale = perturb_scale * span * (0.2 + 0.8 * rng.random())
+        positions.append(np.clip(parent + rng.normal(0.0, scale, parent.shape), -4.0, 4.0))
+
+    def score(xs: list[np.ndarray]) -> np.ndarray:
+        return evaluate_population(tools, [clone_with_x(base, x) for x in xs], target_curve)
+
+    distances = score(positions)
+    best_idx = int(np.argmin(distances))
+    best_x = positions[best_idx].copy()
+    best_d = float(distances[best_idx])
+
+    for generation in range(generations):
+        order = np.argsort(distances)
+        elite_count = max(4, population_size // 5)
+        parent_count = max(elite_count, population_size // 2)
+        elites = [positions[int(i)].copy() for i in order[:elite_count]]
+        parents = [positions[int(i)].copy() for i in order[:parent_count]]
+        next_positions = elites.copy()
+        progress = generation / max(1, generations - 1)
+        sigma = perturb_scale * span * (1.0 - 0.88 * progress)
+
+        while len(next_positions) < population_size:
+            operator = rng.random()
+            if operator < 0.45 and len(parents) >= 3:
+                # Differential mutation followed by binomial coordinate crossover.
+                ids = rng.choice(len(parents), size=3, replace=False)
+                a, b, c = (parents[int(i)] for i in ids)
+                donor = a + rng.uniform(0.45, 0.9) * (b - c)
+                anchor = parents[int(rng.integers(0, len(parents)))]
+                mask = rng.random(anchor.shape) < rng.uniform(0.35, 0.8)
+                mask[int(rng.integers(0, anchor.shape[0])), int(rng.integers(0, 2))] = True
+                child = np.where(mask, donor, anchor)
+            else:
+                # Extrapolating arithmetic crossover between strong parents.
+                parent_a = parents[int(rng.integers(0, len(parents)))]
+                parent_b = parents[int(rng.integers(0, len(parents)))]
+                blend = rng.uniform(-0.25, 1.25, size=(parent_a.shape[0], 1))
+                child = blend * parent_a + (1.0 - blend) * parent_b
+
+            mutation_mask = rng.random(child.shape) < (0.42 - 0.22 * progress)
+            child = child + mutation_mask * rng.normal(0.0, sigma, child.shape)
+            next_positions.append(np.clip(child, -4.0, 4.0))
+
+        positions = next_positions
+        distances = score(positions)
+        generation_idx = int(np.argmin(distances))
+        generation_d = float(distances[generation_idx])
+        if generation_d < best_d:
+            best_d = generation_d
+            best_x = positions[generation_idx].copy()
+
+    return clone_with_x(base, best_x), best_d
+
+
 def gradient_refine(
     grad_tools: DifferentiableTools,
     mechanism: dict[str, Any],
@@ -451,6 +549,74 @@ def generate_random_mechanisms(
         except RuntimeError:
             continue
     return generated
+
+
+def truncate_mechanism(mechanism: dict[str, Any], target_joints: int) -> dict[str, Any] | None:
+    """Truncate an incrementally numbered dyadic mechanism to a smaller prefix."""
+    source = normalized_mechanism(mechanism)
+    if complexity(source) < target_joints or target_joints < MIN_JOINTS:
+        return None
+    edges = np.asarray(source["edges"], dtype=int)
+    keep_edges = edges[np.logical_and(edges[:, 0] < target_joints, edges[:, 1] < target_joints)]
+    fixed = np.asarray(source["fixed_joints"], dtype=int)
+    keep_fixed = fixed[fixed < target_joints]
+    return {
+        "x0": np.asarray(source["x0"], dtype=float)[: target_joints - 2].copy(),
+        "edges": keep_edges.copy(),
+        "fixed_joints": keep_fixed.copy(),
+        "target_idx": target_joints - 1,
+    }
+
+
+def targeted_seed_pool(
+    archive: CandidateArchive,
+    baseline: dict[str, list[dict[str, Any]]],
+    randomizer: MechanismRandomizer,
+    tools: SubmissionTools,
+    target_curve: np.ndarray,
+    joints: int,
+    config: TargetedConfig,
+) -> list[dict[str, Any]]:
+    raw: list[dict[str, Any]] = []
+
+    # Exact-size archive and submission mechanisms from every problem provide known-valid
+    # topology/position seeds, while higher-complexity archive entries provide incremental
+    # dyadic prefixes that can reveal useful smaller structures.
+    for problem_number in range(1, 7):
+        problem_key = f"Problem {problem_number}"
+        archived = archive.get(problem_number, joints)
+        if archived is not None:
+            raw.append(archived)
+        raw.extend(
+            normalized_mechanism(mech)
+            for mech in baseline.get(problem_key, [])
+            if complexity(mech) == joints
+        )
+        for record in archive.records_for_problem(problem_number):
+            if int(record["complexity"]) > joints:
+                truncated = truncate_mechanism(
+                    mechanism_from_jsonable(record["mechanism"]), joints
+                )
+                if truncated is not None:
+                    raw.append(truncated)
+
+    # Multiple deterministic seed streams deliberately retain different starting positions
+    # even when MechanismRandomizer produces the same connectivity more than once.
+    per_stream = int(math.ceil(config.random_restarts_per_size / len(config.base_seeds)))
+    for base_seed in config.base_seeds:
+        stream_seed = base_seed + joints * 100
+        raw.extend(generate_random_mechanisms(randomizer, joints, per_stream, stream_seed))
+    raw = raw[: len(raw) - max(0, len(raw) - (120 + config.random_restarts_per_size))]
+
+    selected: list[dict[str, Any]] = []
+    for candidate in raw:
+        try:
+            chosen, distance = select_target_joint(tools, candidate, target_curve)
+        except Exception:
+            continue
+        if np.isfinite(distance):
+            selected.append(chosen)
+    return selected
 
 
 def pareto_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -765,6 +931,245 @@ def run_search(config: SearchConfig) -> dict[str, Any]:
     return summary
 
 
+def visualize_one_problem(
+    population: list[dict[str, Any]],
+    target_curve: np.ndarray,
+    tools: SubmissionTools,
+    solver: MechanismSolver,
+    problem_number: int,
+    path: Path,
+) -> None:
+    curve_engine = CurveEngine(normalize_scale=True, device="cpu")
+    values = np.asarray(tools.compute_F(population, target_curve))
+    columns = 3
+    rows = int(math.ceil(len(population) / columns))
+    fig, axes = plt.subplots(rows, columns, figsize=(4 * columns, 3.6 * rows), squeeze=False)
+    for ax, mech, (distance, joints) in zip(axes.flat, population, values):
+        normalized = normalized_mechanism(mech)
+        curves = solver(normalized["x0"], normalized["edges"], normalized["fixed_joints"])
+        traced = np.asarray(curves[int(normalized["target_idx"])])
+        aligned, aligned_target, _ = curve_engine.optimal_alignment(traced, target_curve)
+        ax.plot(aligned_target[:, 0], aligned_target[:, 1], color="navy", lw=2.5, label="target")
+        ax.plot(aligned[:, 0], aligned[:, 1], color="darkorange", lw=1.8, label="trajectory")
+        ax.set_title(f"{int(joints)} joints, d={float(distance):.4f}")
+        ax.axis("equal")
+        ax.axis("off")
+    for ax in axes.flat[len(population) :]:
+        ax.axis("off")
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2)
+    fig.suptitle(f"Problem {problem_number}: targeted-search Pareto mechanisms")
+    fig.tight_layout(rect=(0, 0.04, 1, 0.96))
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+
+
+def run_problem2_targeted(config: TargetedConfig = PROBLEM2_TARGETED_CONFIG) -> dict[str, Any]:
+    """Intensive, score-gated search that may change only Problem 2."""
+    started = time.time()
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    targets = np.load(TARGETS_PATH)
+    target_curve = targets[config.problem_number - 1]
+    baseline = load_submission(str(FINAL_PATH))
+    baseline_json = json.dumps(
+        {problem: [mechanism_to_jsonable(mech) for mech in population]
+         for problem, population in baseline.items()},
+        sort_keys=True,
+    )
+    save_submission(baseline, str(RESULTS_DIR / "problem2_targeted_baseline.json"))
+
+    tools = SubmissionTools(timesteps=200, max_size=20, scaled=True, device="cpu")
+    tools.compile()
+    grad_tools = DifferentiableTools(timesteps=200, max_size=20, scaled=True, device="cpu")
+    grad_tools.compile()
+    solver = MechanismSolver(timesteps=200, max_size=20, device="cpu")
+    solver.compile()
+    randomizer = MechanismRandomizer(
+        min_size=MIN_JOINTS,
+        max_size=MAX_JOINTS,
+        timesteps=200,
+        device="cpu",
+    )
+    archive = CandidateArchive(ARCHIVE_PATH)
+    archive.seed_submission(FINAL_PATH, tools, targets)
+
+    baseline_score = evaluate_submission(baseline, targets)
+    baseline_problem2 = float(baseline_score["Score Breakdown"]["Problem 2"])
+    baseline_overall = float(baseline_score["Overall Score"])
+    baseline_values = {
+        complexity(mech): float(tools.compute_F([mech], target_curve)[0, 0])
+        for mech in baseline["Problem 2"]
+    }
+    search_log: list[dict[str, Any]] = []
+
+    for joints in config.sizes:
+        print(f"\n=== Targeted Problem 2, size {joints} ===", flush=True)
+        seeds = targeted_seed_pool(
+            archive, baseline, randomizer, tools, target_curve, joints, config
+        )
+        groups: dict[str, list[dict[str, Any]]] = {}
+        initial_group_distance: dict[str, float] = {}
+        for candidate in seeds:
+            key = mechanism_key(candidate, include_positions=False)
+            groups.setdefault(key, []).append(candidate)
+            distance = float(tools.compute_F([candidate], target_curve)[0, 0])
+            initial_group_distance[key] = min(initial_group_distance.get(key, math.inf), distance)
+
+        ranked_group_keys = sorted(groups, key=lambda key: initial_group_distance[key])
+        ranked_group_keys = ranked_group_keys[: config.max_topology_groups]
+        print(
+            f"  {len(seeds)} finite seeds, {len(groups)} topology/target groups, "
+            f"evolving best {len(ranked_group_keys)} groups",
+            flush=True,
+        )
+
+        evolved_candidates: list[tuple[float, dict[str, Any], str]] = []
+        for group_index, key in enumerate(ranked_group_keys):
+            group_seed = config.base_seeds[group_index % len(config.base_seeds)] + joints * 1000 + group_index
+            rng = np.random.default_rng(group_seed)
+            evolved, evolved_distance = seeded_evolution_multi(
+                tools,
+                groups[key],
+                target_curve,
+                rng,
+                config.population_size,
+                config.generations,
+                config.perturb_scale,
+            )
+            evolved, evolved_distance = select_target_joint(tools, evolved, target_curve)
+            evolved_candidates.append((evolved_distance, evolved, key))
+            print(
+                f"  group {group_index + 1:2d}/{len(ranked_group_keys)}: "
+                f"{initial_group_distance[key]:.6f} -> {evolved_distance:.6f}",
+                flush=True,
+            )
+
+        evolved_candidates.sort(key=lambda item: item[0])
+        finalists = evolved_candidates[: config.gradient_finalists]
+        best_distance = math.inf
+        best_mechanism: dict[str, Any] | None = None
+        best_steps = 0
+        for finalist_index, (pre_gradient, candidate, key) in enumerate(finalists):
+            refined, refined_distance, accepted_steps = gradient_refine(
+                grad_tools,
+                candidate,
+                target_curve,
+                config.gradient_steps,
+                config.gradient_lr,
+            )
+            canonical = float(tools.compute_F([refined], target_curve)[0, 0])
+            search_log.append(
+                {
+                    "complexity": joints,
+                    "finalist": finalist_index,
+                    "topology_key": key,
+                    "pre_gradient_distance": pre_gradient,
+                    "post_gradient_distance": canonical,
+                    "accepted_gradient_steps": accepted_steps,
+                }
+            )
+            if canonical < best_distance:
+                best_distance = canonical
+                best_mechanism = refined
+                best_steps = accepted_steps
+
+        prior_archive = archive.records[f"Problem {config.problem_number}"].get(str(joints))
+        prior_distance = math.inf if prior_archive is None else float(prior_archive["distance"])
+        improved = False
+        if best_mechanism is not None and best_distance < prior_distance - 1e-10:
+            improved = archive.consider(
+                config.problem_number,
+                best_mechanism,
+                best_distance,
+                method="targeted multi-seed topology-preserving evolution + gradient refinement",
+                seed=config.base_seeds[0] + joints,
+            )
+        print(
+            f"  size {joints}: prior={prior_distance:.6f}, best={best_distance:.6f}, "
+            f"accepted_grad_steps={best_steps}, archive={'updated' if improved else 'unchanged'}",
+            flush=True,
+        )
+
+    # Preserve every non-target problem byte-for-byte at the JSON-data level.
+    candidate_submission = copy.deepcopy(baseline)
+    problem2_front = pareto_records(archive.records_for_problem(config.problem_number))
+    candidate_submission["Problem 2"] = [
+        mechanism_from_jsonable(record["mechanism"]) for record in problem2_front
+    ]
+    for problem in ("Problem 1", "Problem 3", "Problem 4", "Problem 5", "Problem 6"):
+        before = [mechanism_to_jsonable(mech) for mech in baseline[problem]]
+        after = [mechanism_to_jsonable(mech) for mech in candidate_submission[problem]]
+        if before != after:
+            raise RuntimeError(f"Targeted run unexpectedly changed {problem}")
+
+    candidate_score = evaluate_submission(candidate_submission, targets)
+    candidate_problem2 = float(candidate_score["Score Breakdown"]["Problem 2"])
+    candidate_overall = float(candidate_score["Overall Score"])
+    score_improved = candidate_overall > baseline_overall + 1e-10
+
+    validation_report: dict[str, Any] | None = None
+    committed_to_submission = False
+    if score_improved:
+        save_submission(candidate_submission, str(FINAL_PATH))
+        reloaded = load_submission(str(FINAL_PATH))
+        _, validation_report = validate_submission_strict(reloaded, targets, tools, solver)
+        if not validation_report["all_valid"]:
+            save_submission(baseline, str(FINAL_PATH))
+            raise RuntimeError("Targeted submission failed independent validation; baseline restored")
+        reloaded_score = validation_report["official_score"]
+        if float(reloaded_score["Overall Score"]) <= baseline_overall + 1e-10:
+            save_submission(baseline, str(FINAL_PATH))
+            raise RuntimeError("Reloaded targeted score did not improve; baseline restored")
+        committed_to_submission = True
+        visualize_one_problem(
+            reloaded["Problem 2"],
+            target_curve,
+            tools,
+            solver,
+            2,
+            RESULTS_DIR / "problem_2_targeted_curves.png",
+        )
+
+    # Report same-size improvements from the complete archive, not only from the final
+    # Pareto front: an improved size can still be dominated by an even better smaller design.
+    final_values = {
+        int(record["complexity"]): float(record["distance"])
+        for record in archive.records_for_problem(config.problem_number)
+    }
+    improvements = {
+        str(joints): {
+            "before": baseline_values.get(joints),
+            "after": final_values.get(joints, baseline_values.get(joints)),
+            "absolute_improvement": (
+                None if baseline_values.get(joints) is None or final_values.get(joints) is None
+                else baseline_values[joints] - final_values[joints]
+            ),
+        }
+        for joints in config.sizes
+    }
+    summary = {
+        "config": asdict(config),
+        "runtime_seconds": time.time() - started,
+        "baseline_score": baseline_score,
+        "candidate_score": candidate_score,
+        "problem2_hypervolume_improvement": candidate_problem2 - baseline_problem2,
+        "overall_score_improvement": candidate_overall - baseline_overall,
+        "score_improved": score_improved,
+        "submission_updated": committed_to_submission,
+        "same_complexity_improvements": improvements,
+        "problem2_pareto_records": problem2_front,
+        "validation": validation_report,
+        "search_log": search_log,
+        "baseline_json_sha256": hashlib.sha256(baseline_json.encode("utf-8")).hexdigest(),
+    }
+    with (RESULTS_DIR / "problem2_targeted_summary.json").open("w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, allow_nan=False)
+    print(json.dumps({key: summary[key] for key in (
+        "baseline_score", "candidate_score", "problem2_hypervolume_improvement",
+        "overall_score_improvement", "submission_updated")}, indent=2), flush=True)
+    return summary
+
+
 def validate_existing() -> dict[str, Any]:
     targets = np.load(TARGETS_PATH)
     tools = SubmissionTools(timesteps=200, max_size=20, scaled=True, device="cpu")
@@ -795,12 +1200,14 @@ def visualize_existing() -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("quick", "full", "validate", "visualize"))
+    parser.add_argument("mode", choices=("quick", "full", "problem2", "validate", "visualize"))
     args = parser.parse_args()
     if args.mode == "quick":
         run_search(QUICK_CONFIG)
     elif args.mode == "full":
         run_search(FULL_CONFIG)
+    elif args.mode == "problem2":
+        run_problem2_targeted()
     elif args.mode == "validate":
         validate_existing()
     else:

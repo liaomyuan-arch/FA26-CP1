@@ -1,0 +1,686 @@
+{
+  "config": {
+    "problem_number": 2,
+    "sizes": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "random_restarts_per_size": 32,
+    "max_topology_groups": 20,
+    "population_size": 48,
+    "generations": 50,
+    "gradient_finalists": 6,
+    "gradient_steps": 250,
+    "gradient_lr": 0.008,
+    "base_seeds": [
+      271021,
+      271057,
+      271091,
+      271129
+    ],
+    "perturb_scale": 0.22
+  },
+  "runtime_seconds": 214.07530117034912,
+  "baseline_score": {
+    "Overall Score": 15.26615836409231,
+    "Score Breakdown": {
+      "Problem 1": 17.07601882889867,
+      "Problem 2": 12.441754460334778,
+      "Problem 3": 15.147222340106964,
+      "Problem 4": 16.32143424451351,
+      "Problem 5": 15.250962764024734,
+      "Problem 6": 15.359557546675205
+    }
+  },
+  "candidate_score": {
+    "Overall Score": 15.865995217114687,
+    "Score Breakdown": {
+      "Problem 1": 17.07601882889867,
+      "Problem 2": 16.040775578469038,
+      "Problem 3": 15.147222340106964,
+      "Problem 4": 16.32143424451351,
+      "Problem 5": 15.250962764024734,
+      "Problem 6": 15.359557546675205
+    }
+  },
+  "problem2_hypervolume_improvement": 3.59902111813426,
+  "overall_score_improvement": 0.5998368530223761,
+  "score_improved": true,
+  "submission_updated": true,
+  "same_complexity_improvements": {
+    "5": {
+      "before": 1.1819735765457153,
+      "after": 0.05880793556571007,
+      "absolute_improvement": 1.1231656409800053
+    },
+    "6": {
+      "before": 1.1786727905273438,
+      "after": 0.05926727503538132,
+      "absolute_improvement": 1.1194055154919624
+    },
+    "7": {
+      "before": 0.896074116230011,
+      "after": 0.04799840226769447,
+      "absolute_improvement": 0.8480757139623165
+    },
+    "8": {
+      "before": 0.45175546407699585,
+      "after": 0.05874239653348923,
+      "absolute_improvement": 0.3930130675435066
+    }
+  },
+  "problem2_pareto_records": [
+    {
+      "distance": 1.409624695777893,
+      "complexity": 4,
+      "method": "existing submission",
+      "seed": null,
+      "mechanism": {
+        "x0": [
+          [
+            -0.04313052568821401,
+            0.982265349450013
+          ],
+          [
+            0.9583612864459863,
+            -0.01671813435076411
+          ]
+        ],
+        "edges": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "fixed_joints": [
+          2
+        ],
+        "target_idx": 3
+      },
+      "updated_at": "2026-09-28T08:23:22-0500"
+    },
+    {
+      "distance": 0.05880793556571007,
+      "complexity": 5,
+      "method": "targeted multi-seed topology-preserving evolution + gradient refinement",
+      "seed": 271026,
+      "mechanism": {
+        "x0": [
+          [
+            0.5162613410063378,
+            -1.3864010512326355
+          ],
+          [
+            2.3314093417976616,
+            0.5644943658961081
+          ],
+          [
+            0.5994158421002206,
+            2.6427098540766765
+          ]
+        ],
+        "edges": [
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "fixed_joints": [
+          2
+        ],
+        "target_idx": 4
+      },
+      "updated_at": "2026-09-28T08:24:20-0500"
+    },
+    {
+      "distance": 0.04799840226769447,
+      "complexity": 7,
+      "method": "targeted multi-seed topology-preserving evolution + gradient refinement",
+      "seed": 271028,
+      "mechanism": {
+        "x0": [
+          [
+            0.17850920814458335,
+            0.1165526569274241
+          ],
+          [
+            0.7167841866256589,
+            0.817946382911625
+          ],
+          [
+            0.09016070656172999,
+            0.474674789178884
+          ],
+          [
+            0.7559265737723797,
+            0.8393368394593647
+          ],
+          [
+            1.3253424332797288,
+            0.06293674463804708
+          ]
+        ],
+        "edges": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        "fixed_joints": [
+          2
+        ],
+        "target_idx": 6
+      },
+      "updated_at": "2026-09-28T08:25:59-0500"
+    }
+  ],
+  "validation": {
+    "all_valid": true,
+    "rows": [
+      {
+        "problem": 1,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 0.3171340823173523,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 1,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.11726845055818558,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 1,
+        "submission_index": 2,
+        "complexity": 7,
+        "distance": 0.04879109188914299,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 1,
+        "submission_index": 3,
+        "complexity": 10,
+        "distance": 0.03765587508678436,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 2,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 1.4096249341964722,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 2,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.05880793556571007,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 2,
+        "submission_index": 2,
+        "complexity": 7,
+        "distance": 0.04799840226769447,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 3,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 0.45869898796081543,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 3,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.42748895287513733,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 3,
+        "submission_index": 2,
+        "complexity": 6,
+        "distance": 0.2559192478656769,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 3,
+        "submission_index": 3,
+        "complexity": 10,
+        "distance": 0.18232271075248718,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 3,
+        "submission_index": 4,
+        "complexity": 11,
+        "distance": 0.15211784839630127,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 4,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 0.19128850102424622,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 4,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.18362490832805634,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 4,
+        "submission_index": 2,
+        "complexity": 6,
+        "distance": 0.16775290668010712,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 4,
+        "submission_index": 3,
+        "complexity": 8,
+        "distance": 0.1314869374036789,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 4,
+        "submission_index": 4,
+        "complexity": 10,
+        "distance": 0.11752886325120926,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 0.37883833050727844,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.25608882308006287,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 2,
+        "complexity": 6,
+        "distance": 0.24335767328739166,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 3,
+        "complexity": 7,
+        "distance": 0.24148613214492798,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 4,
+        "complexity": 8,
+        "distance": 0.23341068625450134,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 5,
+        "submission_index": 5,
+        "complexity": 11,
+        "distance": 0.1858072280883789,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 6,
+        "submission_index": 0,
+        "complexity": 4,
+        "distance": 0.7391031384468079,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 6,
+        "submission_index": 1,
+        "complexity": 5,
+        "distance": 0.5569589734077454,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 6,
+        "submission_index": 2,
+        "complexity": 6,
+        "distance": 0.3333587944507599,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 6,
+        "submission_index": 3,
+        "complexity": 7,
+        "distance": 0.12110915780067444,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      },
+      {
+        "problem": 6,
+        "submission_index": 4,
+        "complexity": 10,
+        "distance": 0.10794912278652191,
+        "valid": true,
+        "simulation_valid": true,
+        "errors": []
+      }
+    ],
+    "official_score": {
+      "Overall Score": 15.865995217114687,
+      "Score Breakdown": {
+        "Problem 1": 17.07601882889867,
+        "Problem 2": 16.040775578469038,
+        "Problem 3": 15.147222340106964,
+        "Problem 4": 16.32143424451351,
+        "Problem 5": 15.250962764024734,
+        "Problem 6": 15.359557546675205
+      }
+    }
+  },
+  "search_log": [
+    {
+      "complexity": 5,
+      "finalist": 0,
+      "topology_key": "97db105aa03868b690b13cc27964383b9ace62083f3754ca30f164c0899c9369",
+      "pre_gradient_distance": 0.062461234629154205,
+      "post_gradient_distance": 0.05880793556571007,
+      "accepted_gradient_steps": 29
+    },
+    {
+      "complexity": 5,
+      "finalist": 1,
+      "topology_key": "d2bad6e91492a8f06c87b383d02b27a0d7c05c64b824c1df9e9d9f2632f6fcaa",
+      "pre_gradient_distance": 0.06984931230545044,
+      "post_gradient_distance": 0.06316106766462326,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 5,
+      "finalist": 2,
+      "topology_key": "c02dd3dc3793451dba74ab79ac48c240045fa0e997630d44e1fe71fbb7411daa",
+      "pre_gradient_distance": 0.25560399889945984,
+      "post_gradient_distance": 0.2526046931743622,
+      "accepted_gradient_steps": 223
+    },
+    {
+      "complexity": 5,
+      "finalist": 3,
+      "topology_key": "0ac8fb565a5ca700ce605563f898aa3b61413da900eda1a49cfb30b89a1f3fd7",
+      "pre_gradient_distance": 0.2564353048801422,
+      "post_gradient_distance": 0.2562755048274994,
+      "accepted_gradient_steps": 42
+    },
+    {
+      "complexity": 5,
+      "finalist": 4,
+      "topology_key": "690cead01e66ba33677d57acf7681ded500f32f780e348fb2b18a3d27606ac6d",
+      "pre_gradient_distance": 0.25739845633506775,
+      "post_gradient_distance": 0.257292777299881,
+      "accepted_gradient_steps": 6
+    },
+    {
+      "complexity": 5,
+      "finalist": 5,
+      "topology_key": "60d66ee88518f53fd3439db359121579287ef5679b352f7b3d8bf4742e8b1481",
+      "pre_gradient_distance": 0.2575494349002838,
+      "post_gradient_distance": 0.2557893693447113,
+      "accepted_gradient_steps": 39
+    },
+    {
+      "complexity": 6,
+      "finalist": 0,
+      "topology_key": "a38dbf236a9f0d1c317f6a08c3777ef1f11f1964f4eff69deb45d1ab8a8b19bb",
+      "pre_gradient_distance": 0.06705054640769958,
+      "post_gradient_distance": 0.06474640965461731,
+      "accepted_gradient_steps": 201
+    },
+    {
+      "complexity": 6,
+      "finalist": 1,
+      "topology_key": "880000367194bf7ab591839f4e1c3fa3f78514206f9767c23261c56337752ab3",
+      "pre_gradient_distance": 0.06753507256507874,
+      "post_gradient_distance": 0.05926727503538132,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 6,
+      "finalist": 2,
+      "topology_key": "5f78c3ce8d33ec32348f1037ff259384b76ea1d636b1b6ef1fe2502f39c1d759",
+      "pre_gradient_distance": 0.07201464474201202,
+      "post_gradient_distance": 0.0655660629272461,
+      "accepted_gradient_steps": 229
+    },
+    {
+      "complexity": 6,
+      "finalist": 3,
+      "topology_key": "0856eb3f7f418fcdfb91bcf44145830dd1eec69cfb6577bbb9cbf51574f833cb",
+      "pre_gradient_distance": 0.07268062233924866,
+      "post_gradient_distance": 0.06518863886594772,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 6,
+      "finalist": 4,
+      "topology_key": "124e8c84493fd5bbdb079c8080fa7eb2271b658987befbe53d0620de53d42861",
+      "pre_gradient_distance": 0.07315406203269958,
+      "post_gradient_distance": 0.06046602129936218,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 6,
+      "finalist": 5,
+      "topology_key": "995f00e5400877251323290d8a8c2b6c51e0d6991904a22976839e9ef83df3aa",
+      "pre_gradient_distance": 0.1723170429468155,
+      "post_gradient_distance": 0.15965892374515533,
+      "accepted_gradient_steps": 28
+    },
+    {
+      "complexity": 7,
+      "finalist": 0,
+      "topology_key": "082614f2736e6afc71c290a92da46705512a9c6f12bc5ef03a249b865b92b644",
+      "pre_gradient_distance": 0.0680340826511383,
+      "post_gradient_distance": 0.06423277407884598,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 7,
+      "finalist": 1,
+      "topology_key": "65832906eb1238d12c257b841d2482148bb196812390305d7831769b6749e83a",
+      "pre_gradient_distance": 0.07346853613853455,
+      "post_gradient_distance": 0.06542665511369705,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 7,
+      "finalist": 2,
+      "topology_key": "7d2861e5826c91e3e0be1480fcdd50d9e910e48112ecb95f7197a836ab02f222",
+      "pre_gradient_distance": 0.09414522349834442,
+      "post_gradient_distance": 0.05776645243167877,
+      "accepted_gradient_steps": 128
+    },
+    {
+      "complexity": 7,
+      "finalist": 3,
+      "topology_key": "5dca2ded4221c5f619e71fe2f83ccc1b4a2f7358cea887bf64440851853e9b08",
+      "pre_gradient_distance": 0.1284710168838501,
+      "post_gradient_distance": 0.04799840226769447,
+      "accepted_gradient_steps": 248
+    },
+    {
+      "complexity": 7,
+      "finalist": 4,
+      "topology_key": "3fd2a9b48ec463eeddeada7a44b64474efc8bd149f80e37b95ec06d7cb0072a6",
+      "pre_gradient_distance": 0.22496405243873596,
+      "post_gradient_distance": 0.18389379978179932,
+      "accepted_gradient_steps": 97
+    },
+    {
+      "complexity": 7,
+      "finalist": 5,
+      "topology_key": "f0ed4aa440e006a8759325d4d5cfc38e61a938a52d0edbe9c29721fcb34f3302",
+      "pre_gradient_distance": 0.28826525807380676,
+      "post_gradient_distance": 0.21867112815380096,
+      "accepted_gradient_steps": 247
+    },
+    {
+      "complexity": 8,
+      "finalist": 0,
+      "topology_key": "3b89f81cd570eabffc1de0fdd13f2fc9031b6981f1644a2246b3f261271f0415",
+      "pre_gradient_distance": 0.06698548048734665,
+      "post_gradient_distance": 0.05874239653348923,
+      "accepted_gradient_steps": 14
+    },
+    {
+      "complexity": 8,
+      "finalist": 1,
+      "topology_key": "de318d67c83a2335f8021a8a03020a750c87bf0886261875412b69b87bfc2853",
+      "pre_gradient_distance": 0.0746796727180481,
+      "post_gradient_distance": 0.07169892638921738,
+      "accepted_gradient_steps": 90
+    },
+    {
+      "complexity": 8,
+      "finalist": 2,
+      "topology_key": "df76cc5bec35d3d7dc942ac878bbad92635107a39c047ec4be000412a227b4a9",
+      "pre_gradient_distance": 0.08446988463401794,
+      "post_gradient_distance": 0.07896750420331955,
+      "accepted_gradient_steps": 99
+    },
+    {
+      "complexity": 8,
+      "finalist": 3,
+      "topology_key": "06ed613245dd7479973b182f1f0dcb1c3fcf8b86214ebddc9fe42ff6bb89411e",
+      "pre_gradient_distance": 0.13226468861103058,
+      "post_gradient_distance": 0.06464643031358719,
+      "accepted_gradient_steps": 248
+    },
+    {
+      "complexity": 8,
+      "finalist": 4,
+      "topology_key": "eaa02189368b1e53956660c63d3c20007aef321a01397251a57420cfa32d674f",
+      "pre_gradient_distance": 0.1335066258907318,
+      "post_gradient_distance": 0.059296272695064545,
+      "accepted_gradient_steps": 250
+    },
+    {
+      "complexity": 8,
+      "finalist": 5,
+      "topology_key": "8ca816e625ae9996f9ff2eb35d52ba185e3919ba8e4ed67ab2724b30a86e48d1",
+      "pre_gradient_distance": 0.1572110950946808,
+      "post_gradient_distance": 0.060341864824295044,
+      "accepted_gradient_steps": 133
+    }
+  ],
+  "baseline_json_sha256": "2d262566136511cbec9a6ece2ce5dd552826c63fa4c551f5b124cc2f16dc0e8d"
+}
